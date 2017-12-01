@@ -1,0 +1,51 @@
+# docker box definition
+box:
+  id: oracle/openjdk:8
+  ports:
+    - "8080"
+
+# defining the dev pipeline
+dev:
+  steps:
+    - script:
+      name: gradle bootRun
+      code: |
+        ./gradlew bootRun
+
+    ### REPLACE the above script step with this internal/watch step to enable 
+    ### dynamic rebuilding/reloading of the container in response to file changes.
+    #
+    # - internal/watch:
+    #     code: |
+    #       ./gradlew bootRun
+    #     reload: true
+
+# Build definition
+build:
+  # The steps that will be executed on build
+  steps:
+    # A step that executes `gradle build` command
+    - script:
+        name: gradle build
+        code: |
+          ./gradlew --full-stacktrace -q --project-cache-dir=$WERCKER_CACHE_DIR build
+
+    - internal/docker-scratch-push:
+        username: rikgibson
+        password: qJJ-7WU-7tu-Su9
+        tag: latest
+        ports: "8080"
+        cmd: ./gradlew bootRun
+        repository: rikgibson/getting-started-java
+        registry: https://registry.hub.docker.com
+
+push-docker-hub:
+  steps:
+    - internal/docker-push:
+        username: $DOCKER_HUB_USERNAME
+        password: $DOCKER_HUB_PASSWORD
+        tag: latest
+        ports: "8080"
+        cmd: gradlew bootRun
+        repository: rikgibson/getting-started-java
+        registry: https://registry.hub.docker.com
