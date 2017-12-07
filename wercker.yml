@@ -31,8 +31,8 @@ build:
           ./gradlew --full-stacktrace -q --project-cache-dir=$WERCKER_CACHE_DIR build
 
     - internal/docker-scratch-push:
-        username: rikgibson
-        password: qJJ-7WU-7tu-Su9
+        username: $DOCKER_HUB_USERNAME
+        password: $DOCKER_HUB_PASSWORD
         tag: latest
         ports: "8080"
         cmd: ./gradlew bootRun
